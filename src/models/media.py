@@ -1,7 +1,8 @@
 from sqlalchemy import ForeignKey
-from sqlalchemy.orm import Mapped, mapped_column, validates, relationship
-
+from sqlalchemy.orm import Mapped, mapped_column, validates
 from src.models.base import Base
+
+FILE_TYPES = (".jpg", ".jpeg", ".png", ".gif", ".pdf", ".epub", ".wbep")
 
 
 class Media(Base):
@@ -13,10 +14,10 @@ class Media(Base):
 
     @validates("media_path")
     def validate_media_path(self, key, media_path: str) -> str:
-        # TODO add more media  later
-        if not media_path.endswith((".jpg", ".jpeg", ".png", ".gif")):
+        # Check if the file extension is in the FILE_TYPES tuple
+        if not media_path.endswith(FILE_TYPES):
             raise ValueError(
-                "Invalid file format. Supported formats: .jpg, .jpeg, .png, .gif"
+                f"Invalid file format. Supported formats: {', '.join(FILE_TYPES)}"
             )
 
         return media_path

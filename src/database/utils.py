@@ -24,4 +24,5 @@ async def get_user_by_api_key(
         )
     )
     user = await session.execute(query)
+
     return user.scalar_one_or_none()
