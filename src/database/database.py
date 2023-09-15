@@ -3,6 +3,8 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_asyn
 from src.utils.settings import PostgresSettings, get_pg_settings
 from sqlalchemy.exc import SQLAlchemyError
 
+from loguru import logger
+
 settings: PostgresSettings = get_pg_settings()
 
 DATABASE_URL = (
@@ -16,10 +18,10 @@ async_session = async_sessionmaker(engine, expire_on_commit=False)
 
 
 async def get_db_session() -> AsyncGenerator[AsyncSession, None]:
-    async with async_session as session:
+    async with async_session() as session:
         try:
             yield session
             await session.commit()
         except SQLAlchemyError as error:
             await session.rollback()
-            raise error
+            logger.exception(error)

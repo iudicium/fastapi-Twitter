@@ -19,7 +19,7 @@ from src.models.base import Base
 async def db_session() -> AsyncGenerator[AsyncSession, None]:
     """Start a test database session."""
     db_name = DATABASE_URL.split("/")[-1]
-    print(db_name)
+
     db_url = DATABASE_URL.replace(f"/{db_name}", "/test")
 
     engine = create_async_engine(db_url)
@@ -31,7 +31,3 @@ async def db_session() -> AsyncGenerator[AsyncSession, None]:
     session = async_sessionmaker(engine)()
     yield session
     await session.close()
-
-
-async def test_main(db_session):
-    pass

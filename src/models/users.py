@@ -1,9 +1,7 @@
 from typing import List
 
-from sqlalchemy import ForeignKey, String, Integer
-from sqlalchemy.orm import Mapped, mapped_column, relationship, declared_attr
-from fastapi_users.db import SQLAlchemyUserDatabase
-from fastapi_users_db_sqlalchemy.access_token import SQLAlchemyBaseAccessTokenTable
+from sqlalchemy import ForeignKey, String
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 from src.models.base import Base
 from src.models.tweets import Tweet
 
@@ -18,22 +16,33 @@ class FollowingAssociation(Base):
     following_id: Mapped[int] = mapped_column(ForeignKey("users.id"), primary_key=True)
     followers_id: Mapped[int] = mapped_column(ForeignKey("users.id"), primary_key=True)
 
+    following: Mapped["User"] = relationship(
+        back_populates="following", foreign_keys=[following_id]
+    )
+    followers: Mapped["User"] = relationship(
+        back_populates="followers", foreign_keys=[followers_id]
+    )
 
-class User(SQLAlchemyUserDatabase, Base):
+
+class User(Base):
     __tablename__ = "users"
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True, index=True)
     api_key: Mapped[str]
     username: Mapped[str] = mapped_column(String(50), unique=True, index=True)
 
-    tweets: Mapped[List[Tweet]] = relationship(
+    tweets: Mapped[List["Tweet"]] = relationship(
         backref="user", cascade="all, delete-orphan"
     )
-    likes: Mapped[List[Like]] = relationship(
+    likes: Mapped[List["Like"]] = relationship(
         backref="user", cascade="all, delete-orphan"
     )
-    followers: Mapped[List[FollowingAssociation]] = relationship(
-        "FollowingAssociation", back_populates="user"
+
+    followers: Mapped[List["FollowingAssociation"]] = relationship(
+        back_populates="following", foreign_keys=[FollowingAssociation.following_id]
+    )
+    following: Mapped[List["FollowingAssociation"]] = relationship(
+        back_populates="followers", foreign_keys=[FollowingAssociation.followers_id]
     )
 
     def __repr__(self):
@@ -41,14 +50,4 @@ class User(SQLAlchemyUserDatabase, Base):
             id=self.id,
             api_key=self.api_key,
             username=self.username,
-        )
-
-
-class AccessToken(SQLAlchemyBaseAccessTokenTable[int], Base):
-    __tablename__ = "auth_token"
-
-    @declared_attr
-    def user_id(cls) -> Mapped[int]:
-        return mapped_column(
-            Integer, ForeignKey("users.id", ondelete="cascade"), nullable=False
         )
