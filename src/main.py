@@ -5,7 +5,6 @@ from src.database.utils import init_models
 from src.utils.loggerconf import get_logger
 from src.utils.settings import get_server_settings
 
-
 app = FastAPI()
 
 

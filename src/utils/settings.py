@@ -5,6 +5,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 ENV_PATH = BASE_DIR / ".env"
+MEDIA_PATH = BASE_DIR / "media"
 
 
 class PostgresSettings(BaseSettings):
@@ -19,6 +20,7 @@ class PostgresSettings(BaseSettings):
     DB_NAME: str
     USER: str
     PASSWORD: str
+    TEST_DB_NAME: str
 
 
 class ServerSettings(BaseSettings):

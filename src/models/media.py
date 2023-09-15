@@ -1,9 +1,11 @@
-from sqlalchemy.orm import Mapped, mapped_column, validates
 from sqlalchemy import ForeignKey
+from sqlalchemy.orm import Mapped, mapped_column, validates
+
 from src.models.base import Base
 
 
 class Media(Base):
+    __tablename__ = "media"
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True, index=True)
 
     media_path: Mapped[str]
@@ -18,3 +20,10 @@ class Media(Base):
             )
 
         return media_path
+
+    def __repr__(self):
+        return self._repr(
+            id=self.id,
+            media_path=self.media_path,
+            tweet_id=self.tweet_id,
+        )

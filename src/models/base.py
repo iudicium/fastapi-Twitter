@@ -1,8 +1,8 @@
 from typing import Any
 
+from sqlalchemy.ext.asyncio import AsyncAttrs
 from sqlalchemy.orm import DeclarativeBase
 from sqlalchemy.orm.exc import DetachedInstanceError
-from sqlalchemy.ext.asyncio import AsyncAttrs
 
 
 class Base(AsyncAttrs, DeclarativeBase):

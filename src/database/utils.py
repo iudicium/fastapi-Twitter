@@ -11,5 +11,4 @@ async def init_models():
 if __name__ == "__main__":
     import asyncio
 
-    print(engine)
     asyncio.run(init_models())
