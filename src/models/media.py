@@ -2,7 +2,18 @@ from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, validates
 from src.models.base import Base
 
-FILE_TYPES = (".jpg", ".jpeg", ".png", ".gif", ".pdf", ".epub", ".wbep")
+FILE_TYPES = (
+    ".jpg",
+    ".jpeg",
+    ".png",
+    ".gif",
+    ".pdf",
+    ".epub",
+    ".wbep",
+    ".txt",
+    ".mp4",
+    ".mp3",
+)
 
 
 class Media(Base):

@@ -1,22 +1,58 @@
-import pytest
-from _pytest._py.path import LocalPath
-
-from src.tests.conftest import client
-from httpx import AsyncClient
 from io import BytesIO
+from os import listdir
+from pathlib import Path
+from shutil import rmtree
+
+import pytest
+from httpx import AsyncClient
+from src.models.media import FILE_TYPES
+from src.tests.conftest import TEST_USERNAME, client
 from src.utils.settings import MEDIA_PATH
 
 
+@pytest.fixture(scope="class")
+def temp_media_dir(request):
+    test_user_media_path = MEDIA_PATH / TEST_USERNAME
+    Path(test_user_media_path).mkdir(parents=True, exist_ok=True)
+    yield test_user_media_path
+    rmtree(test_user_media_path)
+
+
 class TestMediaAPI:
-    @pytest.mark.asyncio
-    async def test_media_route(self, tmpdir: LocalPath, client: AsyncClient):
+    @classmethod
+    def setup_class(cls):
         image_content = b"test"
         image_file = BytesIO(image_content)
+        cls.files = {"file": ("image.jpg", image_file)}
+        cls.invalid_files = {"file": ("image.jpg")}
+        cls.base_url = "/medias"
+        cls.test_user_media_path = MEDIA_PATH / TEST_USERNAME
 
-        files = {"file": ("image.jpg", image_file)}
-
-        response = await client.post("/medias", files=files)
+    @pytest.mark.asyncio
+    async def test_media_route(self, client: AsyncClient, temp_media_dir):
+        response = await client.post(self.base_url, files=self.files)
 
         assert response.status_code == 201
         assert response.json() == {"result": True, "media_id": 1}
-        print(MEDIA_PATH)
+        files = listdir(self.test_user_media_path)
+        if len(files) >= 1:
+            hash, file_extension = files[0].split(".")
+            assert len(hash) == 64
+            assert file_extension == "jpg"
+
+    @pytest.mark.asyncio
+    async def test_incorrect_api_key(self, client: AsyncClient):
+        headers = {"api_key": "RMTREE"}
+        response = await client.post(self.base_url, headers=headers, files=self.files)
+        assert response.status_code == 401
+
+    @pytest.mark.asyncio
+    async def test_incorrect_file_schema(self, client: AsyncClient, temp_media_dir):
+        try:
+            response = await client.post(self.base_url, files=self.invalid_files)
+            assert response.status_code == 400
+        except ValueError as e:
+            expected_message = (
+                f"Invalid file format. Supported formats: {', '.join(FILE_TYPES)}"
+            )
+            assert str(e) == expected_message

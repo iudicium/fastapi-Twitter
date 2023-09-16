@@ -20,7 +20,6 @@ class PostgresSettings(BaseSettings):
     DB_NAME: str
     USER: str
     PASSWORD: str
-    TEST_DB_NAME: str
 
 
 class ServerSettings(BaseSettings):
@@ -38,6 +37,23 @@ class ServerSettings(BaseSettings):
     PORT: str
 
 
+class TestSettings(BaseSettings):
+    """
+    Testing configuration
+    """
+
+    model_config = SettingsConfigDict(
+        env_file=ENV_PATH,
+        env_prefix="TEST_",
+        env_file_encoding="utf-8",
+        case_sensitive=True,
+    )
+
+    DB_NAME: str
+    API_KEY: str
+    USERNAME: str
+
+
 @lru_cache()
 def get_pg_settings():
     return PostgresSettings()
@@ -46,3 +62,8 @@ def get_pg_settings():
 @lru_cache()
 def get_server_settings():
     return ServerSettings()
+
+
+@lru_cache()
+def get_test_settings():
+    return TestSettings()

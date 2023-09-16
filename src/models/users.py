@@ -17,11 +17,16 @@ class FollowingAssociation(Base):
     followers_id: Mapped[int] = mapped_column(ForeignKey("users.id"), primary_key=True)
 
     following: Mapped["User"] = relationship(
-        back_populates="following", foreign_keys=[following_id]
+        back_populates="followers", foreign_keys=[following_id]
     )
     followers: Mapped["User"] = relationship(
-        back_populates="followers", foreign_keys=[followers_id]
+        back_populates="following", foreign_keys=[followers_id]
     )
+
+    def __repr__(self):
+        return self._repr(
+            following_id=self.following_id, followers_id=self.followers_id
+        )
 
 
 class User(Base):

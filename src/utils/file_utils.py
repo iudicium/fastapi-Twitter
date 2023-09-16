@@ -1,7 +1,6 @@
 import os
 from aiofiles import open
 from hashlib import sha256
-
 from fastapi import UploadFile
 from src.utils.settings import MEDIA_PATH
 
