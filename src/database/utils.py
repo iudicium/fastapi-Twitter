@@ -13,6 +13,18 @@ async def init_models():
         await conn.run_sync(Base.metadata.create_all)
 
 
+async def get_follower(
+    following: int, follower: int, session: AsyncSession = Depends(get_db_session)
+):
+    is_following = await session.execute(
+        select(FollowingAssociation).filter(
+            FollowingAssociation.following_id == following,
+            FollowingAssociation.followers_id == follower,
+        )
+    )
+    return is_following.scalar_one_or_none()
+
+
 async def get_user_by_api_key(
     api_key: str, session: AsyncSession = Depends(get_db_session)
 ):
@@ -56,23 +68,16 @@ async def check_follow_user_ability(
         )
 
     elif user_being_followed.id == current_user.id:
-        logger.info(f"User {current_user} tried to follow himself")
+        logger.info(f"User {current_user.username} tried to follow himself")
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail="Unable to follow yourself"
         )
 
     else:
-        is_following = await session.execute(
-            select(FollowingAssociation).filter(
-                FollowingAssociation.following_id == user_being_followed.id,
-                FollowingAssociation.followers_id == current_user.id,
-            )
+        is_following = await get_follower(
+            user_being_followed.id, current_user.id, session
         )
-        if is_following.scalar():
+        if is_following:
             logger.info(f"User {current_user} already follows {user_being_followed}")
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="You already follow that user!",
-            )
-
+            return False
     return True

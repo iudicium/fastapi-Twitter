@@ -47,7 +47,9 @@ class User(Base):
         back_populates="following", foreign_keys=[FollowingAssociation.following_id]
     )
     following: Mapped[List["FollowingAssociation"]] = relationship(
-        back_populates="followers", foreign_keys=[FollowingAssociation.followers_id]
+        back_populates="followers",
+        foreign_keys=[FollowingAssociation.followers_id],
+        cascade="all, delete-orphan",
     )
 
     def __repr__(self):

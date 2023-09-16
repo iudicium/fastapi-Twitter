@@ -9,7 +9,7 @@ from src.models.users import User, FollowingAssociation
 
 from src.utils.auth import authenticate_user
 
-from src.database.utils import get_user_by_id, check_follow_user_ability
+from src.database.utils import get_user_by_id, check_follow_user_ability, get_follower
 from src.database.database import get_db_session
 
 router = APIRouter(prefix="/api/v1", tags=["users_v1"])
@@ -43,7 +43,11 @@ async def follow_user(
             user_to_follow.followers.append(follower_association)
 
             await session.commit()
-
+        else:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="You already follow that user!",
+            )
         return {"result": True}
 
     except ValueError as exc:
@@ -51,3 +55,33 @@ async def follow_user(
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail="Oops. Something went wrong"
         )
+
+
+@router.delete(
+    "/users/{user_id}/follow",
+    status_code=status.HTTP_200_OK,
+    response_model=BaseShema,
+)
+async def delete_follower(
+    user_id: int,
+    current_user: Annotated[User, "User model obtained from the api key"] = Depends(
+        authenticate_user
+    ),
+    session: AsyncSession = Depends(get_db_session),
+):
+    try:
+        follower = await get_follower(
+            following=user_id, follower=current_user.id, session=session
+        )
+        if not follower:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="You are not following this user.",
+            )
+        user = await get_user_by_id(current_user.id, session)
+        user.following.remove(follower)
+        await session.commit()
+        return {"result": True}
+
+    except ValueError as exc:
+        logger.exception(exc)
