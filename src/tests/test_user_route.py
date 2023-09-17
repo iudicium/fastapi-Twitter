@@ -56,7 +56,6 @@ class TestMediaAPI:
     @pytest.mark.asyncio
     async def test_get_me_information(self, client: AsyncClient):
         url = self.base_url.replace("{}/follow", "me")
-        print(url)
         response = await client.get(url)
         data = response.json()
         assert response.status_code == 200

@@ -51,9 +51,7 @@ async def follow_user(
     session: AsyncSession = Depends(get_db_session),
 ):
     user_to_follow = await get_user_by_id(user_id, session)
-    following_ability = await check_follow_user_ability(
-        current_user, user_to_follow, session
-    )
+    following_ability = await check_follow_user_ability(current_user, user_to_follow)
 
     if following_ability:
         user_to_follow.followers.append(current_user)

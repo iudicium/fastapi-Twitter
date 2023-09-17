@@ -16,17 +16,16 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
     )
     logger.exception(exc)
     return JSONResponse(
-        error_schema.model_dump_json(), status_code=status.HTTP_422_UNPROCESSABLE_ENTITY
+        error_schema.model_dump(), status_code=status.HTTP_422_UNPROCESSABLE_ENTITY
     )
 
 
 async def custom_http_exception_handler(request: Request, exc: StarletteHTTPException):
     logger.error(f"Method: {request.method} | URL: {request.url} Details: {exc.detail}")
     logger.exception(exc)
-    logger.debug(exc.detail)
+
     error_schema = ErrorResponse(
         error_type=responses[exc.status_code], error_message=repr(exc.detail)
     )
-    return JSONResponse(
-        status_code=exc.status_code, content=error_schema.model_dump_json()
-    )
+    print(error_schema.model_dump_json())
+    return JSONResponse(status_code=exc.status_code, content=error_schema.model_dump())

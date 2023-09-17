@@ -1,12 +1,11 @@
+from typing import List
 from fastapi import Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 from src.database.database import engine, get_db_session
-from src.models.users import Base, User, user_to_user
+from src.models.users import Base, User, Tweet, Media, Like
 from loguru import logger
-
-"""DATABASE UTILITIES"""
 
 
 async def init_models():
@@ -51,7 +50,6 @@ async def get_user_by_id(user_id: int, session: AsyncSession = Depends(get_db_se
 async def check_follow_user_ability(
     current_user: User,
     user_being_followed: User,
-    session: AsyncSession = Depends(get_db_session()),
 ) -> bool:
     """Check if the following requests matches all the criteria"""
 
@@ -63,3 +61,64 @@ async def check_follow_user_ability(
     elif user_being_followed in current_user.following:
         return False
     return True
+
+
+async def associate_media_with_tweet(
+    tweet: Tweet, media_ids: List[int], session: AsyncSession = Depends(get_db_session)
+):
+    """
+    Associate one or more Media objects with a Tweet.
+
+    Args:
+        session (Session): The SQLAlchemy session.
+        tweet (Tweet): The Tweet object to associate with Media.
+        media_ids (List[int]): List of media IDs to associate with the Tweet.
+    """
+    # Query the Media objects based on their IDs
+    media_query = await session.execute(select(Media).filter(Media.id.in_(media_ids)))
+
+    media_objects = media_query.scalars()
+
+    for media in media_objects:
+        logger.debug(f"Media ID: {media.id}, Tweet ID: {media.tweet_id}")
+        if not media.tweet_id:
+            media.tweet_id = tweet.id
+
+    session.add_all(media_objects)
+
+
+async def get_tweet_by_id(
+    tweet_id: int,
+    session: AsyncSession = Depends(get_db_session),
+):
+    """
+    Retrieve a tweet by its unique identifier.
+
+    Parameters:
+    - tweet_id (int): The unique identifier of the tweet to retrieve.
+    - session (AsyncSession, optional): An SQLAlchemy async session (provided by `get_db_session`)
+      used to interact with the database.
+
+    Returns:
+    - Tweet: The retrieved tweet object.
+
+    Raises:
+    - HTTPException: If the tweet with the specified `tweet_id` is not found in the database,
+      an HTTPException with a status code of 404 (Not Found) is raised.
+    """
+
+    tweet = await session.get(Tweet, tweet_id)
+
+    if not tweet:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Tweet was not found!"
+        )
+    return tweet
+
+
+async def get_like_by_id(session: AsyncSession, tweet_id: int, user_id: int):
+    """Get a like by user_id and tweet_id, or return None if not found"""
+    query = await session.execute(
+        select(Like).where(Like.user_id == user_id, Like.tweet_id == tweet_id)
+    )
+    return query.scalar_one_or_none()

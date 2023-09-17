@@ -5,7 +5,7 @@ from src.schemas.base_schema import DefaultSchema
 
 class TweetIn(BaseModel):
     tweet_data: str
-    tweet_media_ids: Optional[List[int]]
+    tweet_media_ids: Optional[List[int]] = list()
 
 
 class TweetOut(DefaultSchema):
