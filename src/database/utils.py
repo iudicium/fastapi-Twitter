@@ -56,14 +56,10 @@ async def check_follow_user_ability(
     """Check if the following requests matches all the criteria"""
 
     if user_being_followed.id == current_user.id:
-        logger.info(f"User {current_user.username} tried to follow himself")
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail="Unable to follow yourself"
         )
 
     elif user_being_followed in current_user.following:
-        logger.info(
-            f"User {current_user.username} already follows {user_being_followed.username}"
-        )
         return False
     return True

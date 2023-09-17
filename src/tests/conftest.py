@@ -1,11 +1,11 @@
 from collections.abc import AsyncGenerator
-from random import sample, randint
+
 import pytest
 import pytest_asyncio
 from fastapi import FastAPI
 from httpx import AsyncClient
-from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
-from sqlalchemy import delete
+from sqlalchemy.ext.asyncio import (AsyncSession, async_sessionmaker,
+                                    create_async_engine)
 from src.database.database import DATABASE_URL, get_db_session
 from src.main import app
 from src.models.base import Base

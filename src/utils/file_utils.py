@@ -1,4 +1,4 @@
-import os
+from os.path import splitext
 from aiofiles import open
 from hashlib import sha256
 from fastapi import UploadFile
@@ -12,7 +12,7 @@ async def generate_hash_from_filename(file_name: str) -> str:
     :param file_name: The original file name to be hashed.
     :return: A unique hash-based file name including the original file extension.
     """
-    name, extension = os.path.splitext(file_name)
+    name, extension = splitext(file_name)
     hash_object = sha256(name.encode())
     hashed_name = hash_object.hexdigest()
     return f"{hashed_name}{extension}"

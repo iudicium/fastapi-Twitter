@@ -1,15 +1,29 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends
+from fastapi.exceptions import RequestValidationError
+from starlette.exceptions import HTTPException
 from uvicorn import run
-
-from src.routes import media_route, user_route
+from loguru import logger
+from src.routes import media_route, user_route, tweet_route
 from src.database.utils import init_models
-from src.utils.loggerconf import get_logger
+from src.utils.loggerconf import get_logger, logging_dependency
 from src.utils.settings import get_server_settings
+from src.utils.exceptions import (
+    validation_exception_handler,
+    custom_http_exception_handler,
+)
 
+
+# Need to remove the file
+get_logger("logs/logs.log")
 app = FastAPI(debug=True)
 
-app.include_router(media_route.router)
-app.include_router(user_route.router)
+app.add_exception_handler(RequestValidationError, validation_exception_handler)
+app.add_exception_handler(HTTPException, custom_http_exception_handler)
+
+
+app.include_router(media_route.router, dependencies=[Depends(logging_dependency)])
+app.include_router(user_route.router, dependencies=[Depends(logging_dependency)])
+app.include_router(tweet_route.router, dependencies=[Depends(logging_dependency)])
 
 
 @app.on_event("startup")
@@ -20,5 +34,5 @@ async def create_initial_data():
 
 if __name__ == "__main__":
     settings = get_server_settings()
-    logger = get_logger("logs/logs.log")
-    run(app, host="localhost", port=8000)
+
+    run(app, host=settings.HOST, port=int(settings.PORT))

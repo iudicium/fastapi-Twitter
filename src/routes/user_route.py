@@ -1,7 +1,6 @@
 from typing import Annotated
 from fastapi import APIRouter, status, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
-from loguru import logger
 
 
 from src.schemas.base_schema import DefaultSchema
@@ -24,7 +23,6 @@ async def get_info_about_me(
         authenticate_user
     ),
 ):
-    logger.debug(current_user)
     return {"user": current_user}
 
 
@@ -52,30 +50,20 @@ async def follow_user(
     ),
     session: AsyncSession = Depends(get_db_session),
 ):
-    logger.info(
-        f"User being followed {user_id} || User who's following:  {current_user.id}"
+    user_to_follow = await get_user_by_id(user_id, session)
+    following_ability = await check_follow_user_ability(
+        current_user, user_to_follow, session
     )
-    try:
-        user_to_follow = await get_user_by_id(user_id, session)
-        following_ability = await check_follow_user_ability(
-            current_user, user_to_follow, session
-        )
 
-        if following_ability:
-            user_to_follow.followers.append(current_user)
-            await session.commit()
-        else:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="You already follow that user!",
-            )
-        return {"result": True}
-
-    except ValueError as exc:
-        logger.exception(exc)
+    if following_ability:
+        user_to_follow.followers.append(current_user)
+        await session.commit()
+    else:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail="Oops. Something went wrong"
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="You already follow that user!",
         )
+    return {"result": True}
 
 
 @router.delete(
@@ -90,17 +78,14 @@ async def unsubscribe_from_user(
     ),
     session: AsyncSession = Depends(get_db_session),
 ):
-    try:
-        follower_deleted = await get_user_by_id(user_id, session)
+    follower_deleted = await get_user_by_id(user_id, session)
 
-        if follower_deleted not in current_user.following:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="You are not following this user.",
-            )
+    if follower_deleted not in current_user.following:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="You are not following this user.",
+        )
 
-        current_user.following.remove(follower_deleted)
-        await session.commit()
-        return {"result": True}
-    except ValueError as exc:
-        logger.exception(exc)
+    current_user.following.remove(follower_deleted)
+    await session.commit()
+    return {"result": True}

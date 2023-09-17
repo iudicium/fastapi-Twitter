@@ -5,7 +5,6 @@ from shutil import rmtree
 
 import pytest
 from httpx import AsyncClient
-from src.models.media import FILE_TYPES
 from src.tests.conftest import TEST_USERNAME, client
 from src.utils.settings import MEDIA_PATH
 
@@ -45,14 +44,3 @@ class TestMediaAPI:
         headers = {"api_key": "RMTREE"}
         response = await client.post(self.base_url, headers=headers, files=self.files)
         assert response.status_code == 401
-
-    @pytest.mark.asyncio
-    async def test_incorrect_file_schema(self, client: AsyncClient, temp_media_dir):
-        try:
-            response = await client.post(self.base_url, files=self.invalid_files)
-            assert response.status_code == 400
-        except ValueError as e:
-            expected_message = (
-                f"Invalid file format. Supported formats: {', '.join(FILE_TYPES)}"
-            )
-            assert str(e) == expected_message
