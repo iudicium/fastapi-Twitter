@@ -17,11 +17,12 @@ async def authenticate_user(
     @TODO maybe i should rename the function to something better
     """
     user = await get_user_by_api_key(api_key, session)
-
+    logger.debug(user)
     if user is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="API key authentication failed",
         )
 
+    logger.info("User auth sucess")
     return user

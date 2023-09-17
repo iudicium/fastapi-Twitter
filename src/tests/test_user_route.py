@@ -1,9 +1,6 @@
 import pytest
 from httpx import AsyncClient
-from src.tests.conftest import TEST_USERNAME, client
-from sqlalchemy.ext.asyncio.session import AsyncSession
-from sqlalchemy import select
-from src.models.users import User, FollowingAssociation
+from src.tests.conftest import client
 
 
 class TestMediaAPI:
@@ -28,7 +25,7 @@ class TestMediaAPI:
     @pytest.mark.asyncio
     async def test_follow_user_that_doesnt_exist(self, client: AsyncClient):
         response = await client.post(self.base_url.format("10000"))
-        assert response.json() == {"detail": "User does not exist"}
+        assert response.json() == {"detail": "User does not exist."}
         assert response.status_code == 404
 
     @pytest.mark.asyncio
@@ -42,6 +39,6 @@ class TestMediaAPI:
 
     @pytest.mark.asyncio
     async def test_unfollow_user_that_is_not_followed(self, client: AsyncClient):
-        response = await client.delete(self.base_url.format(500000))
+        response = await client.delete(self.base_url.format(6))
         assert response.status_code == 400
         assert response.json() == self.bad_response
