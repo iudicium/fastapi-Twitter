@@ -1,13 +1,16 @@
 from sys import stdout
-from loguru import logger
+
 from fastapi import Request
+from loguru import logger
+
 from src.utils.settings import BASE_DIR
 
 
 def get_logger(path: str):
     log_path = BASE_DIR / path
     format = (
-        "<green>{time:YYYY-MM-DD HH:mm:ss}</green> | <level>{level: <8}</level> | <cyan>{name}</cyan>:<cyan>{"
+        "<green>{time:YYYY-MM-DD HH:mm:ss}</green> | <level>{level: <8}</level> "
+        "| <cyan>{name}</cyan>:<cyan>{"
         "function}</cyan>:<cyan>{line}</cyan> - <level>{message}</level>"
     )
     # TODO add LOGGER_LEVEL in .env and configure it in settings

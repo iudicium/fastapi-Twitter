@@ -1,15 +1,15 @@
 from typing import Annotated
-from fastapi import APIRouter, status, UploadFile, Depends, HTTPException
-from sqlalchemy.ext.asyncio import AsyncSession
+
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, status
 from loguru import logger
+from sqlalchemy.ext.asyncio import AsyncSession
 
-
-from src.schemas.media_schema import MediaUpload
-from src.models.users import User
+from src.database.database import get_db_session
 from src.models.media import Media
+from src.models.users import User
+from src.schemas.media_schema import MediaUpload
 from src.utils.auth import authenticate_user
 from src.utils.file_utils import save_uploaded_file
-from src.database.database import get_db_session
 
 router = APIRouter(prefix="/api/v1", tags=["media_v1"])
 

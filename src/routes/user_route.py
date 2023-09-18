@@ -1,22 +1,20 @@
 from typing import Annotated
-from fastapi import APIRouter, status, Depends, HTTPException
+
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-
-from src.schemas.base_schema import DefaultSchema
-
-from src.schemas.user_schema import UserOutSchema
-from src.models.users import User
-
-from src.utils.auth import authenticate_user
-
-from src.database.utils import get_user_by_id, check_follow_user_ability
 from src.database.database import get_db_session
+from src.database.utils import check_follow_user_ability, get_user_by_id
+from src.models.users import User
+from src.schemas.base_schema import DefaultSchema
+from src.schemas.user_schema import UserOutSchema
+from src.utils.auth import authenticate_user
 
 router = APIRouter(prefix="/api/v1", tags=["users_v1"])
 
 
-# Endpoint has to be here otherwise it will be 422 unprocessable entity, as the router after that registers "me" as an integer
+# Endpoint has to be here otherwise it will be 422 unprocessable
+# entity, as the router after that registers "me" as an integer
 @router.get("/users/me", status_code=status.HTTP_200_OK, response_model=UserOutSchema)
 async def get_info_about_me(
     current_user: Annotated[User, "User model obtained from the api key"] = Depends(
@@ -32,6 +30,9 @@ async def get_info_about_me(
 async def get_info_of_user_by_id(
     user_id: int,
     session: AsyncSession = Depends(get_db_session),
+    current_user: Annotated[User, "User model obtained from the api key"] = Depends(
+        authenticate_user
+    ),
 ):
     user = await get_user_by_id(user_id, session)
 

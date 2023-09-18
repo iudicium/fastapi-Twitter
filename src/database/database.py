@@ -1,9 +1,10 @@
 from typing import AsyncGenerator
-from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
-from src.utils.settings import PostgresSettings, get_pg_settings
-from sqlalchemy.exc import SQLAlchemyError
 
 from loguru import logger
+from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
+
+from src.utils.settings import PostgresSettings, get_pg_settings
 
 settings: PostgresSettings = get_pg_settings()
 

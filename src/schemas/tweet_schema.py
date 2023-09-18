@@ -1,33 +1,18 @@
 from typing import List, Optional
+
+
 from pydantic import (
     BaseModel,
     ConfigDict,
     Field,
     field_validator,
-    HttpUrl,
+    model_validator,
 )
 
-# from pydantic.utils import GetterDict
+from src.models.likes import Like as LikeModel
 from src.schemas.base_schema import DefaultSchema
-from src.schemas.user_schema import DefaultUser
 from src.schemas.media_schema import Media
-
-from src.models.likes import Like as ModelLike
-from loguru import logger
-
-
-# class MediaGetter(GetterDict):
-#     def get(self, key: str, default):
-#         logger.debug(f"{key}{default}")
-#         if hasattr(self._obj, key):
-#             return super().get(key, default)
-#
-#         getter_fun_name = f"get_{key}"
-#         if not (getter := getattr(self.model_class, getter_fun_name, None)):
-#             raise AttributeError(f"no field getter function found for {key}")
-#
-#         return getter(self._obj)
-#
+from src.schemas.user_schema import DefaultUser
 
 
 class Like(BaseModel):
@@ -36,13 +21,14 @@ class Like(BaseModel):
         from_attributes=True,
     )
     user_id: int
-    username: Optional[str] = Field(alias="name")
+    username: str = Field(alias="name")
 
-    @field_validator("username", mode="before", check_fields=False)
+    @model_validator(mode="before")
     @classmethod
-    def validate_username(cls, v):
-        logger.debug(v)
-        return vars(v["user"])
+    def validate_model(self, data: LikeModel) -> "Like":
+        """Field username does not actually exist on our model, because
+        it is  a relationship to the user, we have to construct the model"""
+        return Like.model_construct(user_id=data.user_id, username=data.user.username)
 
 
 class TweetIn(BaseModel):
@@ -61,17 +47,11 @@ class Tweet(BaseModel):
     user: DefaultUser = Field(alias="author")
     likes: List[Like]
 
-    @field_validator("media")
+    @field_validator("media", mode="after")
     @classmethod
     def extract_attachments(cls, values: Media):
         media_files = [value for value in values]
         return media_files
-
-    @field_validator("likes")
-    @classmethod
-    def validate_likes(cls, likes: Like):
-        logger.debug(likes)
-        return
 
 
 class TweetOut(DefaultSchema):

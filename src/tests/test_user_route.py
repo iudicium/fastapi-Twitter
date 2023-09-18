@@ -1,7 +1,7 @@
-from random import randint
 import pytest
 from httpx import AsyncClient
-from src.tests.conftest import client
+
+from src.tests.conftest import unauthorized_structure_response
 
 
 class TestMediaAPI:
@@ -53,7 +53,6 @@ class TestMediaAPI:
         self.error_response["error_type"] = "Bad Request"
         self.error_response["error_message"] = "You are not following this user."
         response = await client.delete(self.base_url.format(6))
-        print(response.json(), 555, self.error_response, "penis")
         assert response.status_code == 400
         assert response.json() == self.error_response
 
@@ -63,7 +62,7 @@ class TestMediaAPI:
         response = await client.get(url.format(1))
         data = response.json()
         assert response.status_code == 200
-        assert data["result"] == True
+        assert data["result"] is True
 
     @pytest.mark.asyncio
     async def test_get_me_information(self, client: AsyncClient):
@@ -71,4 +70,18 @@ class TestMediaAPI:
         response = await client.get(url)
         data = response.json()
         assert response.status_code == 200
-        assert data["result"] == True
+        assert data["result"] is True
+
+    @pytest.mark.asyncio
+    @pytest.mark.parametrize("unauthorized", ["/users/me", "/users/2"])
+    async def test_get_wrong_auth(self, invalid_client: AsyncClient, unauthorized: str):
+        response = await invalid_client.get(unauthorized)
+        print(response.json(), response.status_code)
+        assert response.status_code == 401
+        assert response.json() == unauthorized_structure_response
+
+    @pytest.mark.asyncio
+    async def test_post_wrong_auth(self, invalid_client: AsyncClient):
+        response = await invalid_client.post(self.base_url.format("1"))
+        assert response.status_code == 401
+        assert response.json() == unauthorized_structure_response

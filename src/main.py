@@ -1,18 +1,18 @@
-from fastapi import FastAPI, Depends
+from fastapi import Depends, FastAPI
 from fastapi.exceptions import RequestValidationError, ResponseValidationError
+from loguru import logger
 from starlette.exceptions import HTTPException
 from uvicorn import run
-from loguru import logger
-from src.routes import media_route, user_route, tweet_route
+
 from src.database.utils import init_models
-from src.utils.loggerconf import get_logger, logging_dependency
-from src.utils.settings import get_server_settings
+from src.routes import media_route, tweet_route, user_route
 from src.utils.exceptions import (
-    validation_exception_handler,
     custom_http_exception_handler,
     response_validation_exception_handler,
+    validation_exception_handler,
 )
-
+from src.utils.loggerconf import get_logger, logging_dependency
+from src.utils.settings import get_server_settings
 
 # Need to remove the file
 get_logger("logs/logs.log")

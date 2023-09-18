@@ -1,24 +1,22 @@
 from typing import Annotated
-from fastapi import APIRouter, status, Depends, HTTPException
+
+from fastapi import APIRouter, Depends, HTTPException, status
+
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.schemas.base_schema import DefaultSchema
-from src.schemas.tweet_schema import TweetIn, TweetOut
-
-from src.utils.auth import authenticate_user
-
-from src.models.users import User
-from src.models.likes import Like
-from src.models.tweets import Tweet
-
+from src.database.database import get_db_session
 from src.database.utils import (
     associate_media_with_tweet,
-    get_tweet_by_id,
-    get_like_by_id,
     get_all_following_tweets,
+    get_like_by_id,
+    get_tweet_by_id,
 )
-from src.database.database import get_db_session
-from loguru import logger
+from src.models.likes import Like
+from src.models.tweets import Tweet
+from src.models.users import User
+from src.schemas.base_schema import DefaultSchema
+from src.schemas.tweet_schema import TweetIn, TweetOut
+from src.utils.auth import authenticate_user
 
 router = APIRouter(prefix="/api/v1", tags=["tweets_and_likes_v1"])
 
@@ -110,7 +108,7 @@ async def delete_like_from_tweet(
     session: AsyncSession = Depends(get_db_session),
 ):
     # This will raise an error if tweet does not exist
-    tweet = await get_tweet_by_id(tweet_id, session)
+    await get_tweet_by_id(tweet_id, session)
     like = await get_like_by_id(session, tweet_id=tweet_id, user_id=current_user.id)
     if like:
         await session.delete(like)

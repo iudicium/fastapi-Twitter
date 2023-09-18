@@ -1,9 +1,11 @@
 from http.client import responses
+
 from fastapi import Request, status
 from fastapi.exceptions import RequestValidationError, ResponseValidationError
 from fastapi.responses import JSONResponse
-from starlette.exceptions import HTTPException as StarletteHTTPException
 from loguru import logger
+from starlette.exceptions import HTTPException as StarletteHTTPException
+
 from src.schemas.exception_schema import ErrorResponse
 
 

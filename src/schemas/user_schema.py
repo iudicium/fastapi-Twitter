@@ -1,5 +1,7 @@
 from typing import List
+
 from pydantic import BaseModel, ConfigDict, Field
+
 from src.schemas.base_schema import DefaultSchema
 
 

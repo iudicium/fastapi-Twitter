@@ -5,12 +5,14 @@ from shutil import rmtree
 
 import pytest
 from httpx import AsyncClient
-from src.tests.conftest import TEST_USERNAME, client
+
+from src.tests.conftest import TEST_USERNAME
 from src.utils.settings import MEDIA_PATH
 
 
 @pytest.fixture(scope="class")
 def temp_media_dir(request):
+    """Clean up of folder media"""
     test_user_media_path = MEDIA_PATH / TEST_USERNAME
     Path(test_user_media_path).mkdir(parents=True, exist_ok=True)
     yield test_user_media_path

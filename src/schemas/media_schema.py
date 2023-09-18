@@ -1,5 +1,6 @@
 from pydantic import BaseModel
-from src.schemas.base_schema import DefaultSchema, ConfigDict
+
+from src.schemas.base_schema import ConfigDict, DefaultSchema
 
 
 class MediaUpload(DefaultSchema):

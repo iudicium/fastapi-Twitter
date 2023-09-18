@@ -1,11 +1,13 @@
 from typing import List
+
 from fastapi import Depends, HTTPException, status
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
-from sqlalchemy.orm import selectinload
-from src.database.database import engine, get_db_session
-from src.models.users import Base, User, Tweet, Media, Like
 from loguru import logger
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
+
+from src.database.database import engine, get_db_session
+from src.models.users import Base, Like, Media, Tweet, User
 
 
 async def init_models():

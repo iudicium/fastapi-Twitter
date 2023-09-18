@@ -1,7 +1,9 @@
-from os.path import splitext
-from aiofiles import open
 from hashlib import sha256
+from os.path import splitext
+
+from aiofiles import open
 from fastapi import UploadFile
+
 from src.utils.settings import MEDIA_PATH
 
 

@@ -1,15 +1,14 @@
 from typing import List
 
-from sqlalchemy import ForeignKey, String, Table, Column, Integer
+from sqlalchemy import Column, ForeignKey, Integer, String, Table
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from src.models.base import Base
-from src.models.tweets import Tweet
 
+from src.models.base import Base
+from src.models.likes import Like
 
 # Needed import for creating the media model, sqlalchemy doesn't recognize other models otherwise
 from src.models.media import Media
-from src.models.likes import Like
-
+from src.models.tweets import Tweet
 
 user_to_user = Table(
     "user_to_user",

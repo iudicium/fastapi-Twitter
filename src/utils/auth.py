@@ -1,10 +1,10 @@
-from fastapi import Depends, Security, HTTPException, status
+from fastapi import Depends, HTTPException, Security, status
 from fastapi.security import APIKeyHeader
 
 from sqlalchemy.ext.asyncio import AsyncSession
-from src.database.utils import get_user_by_api_key
+
 from src.database.database import get_db_session
-from loguru import logger
+from src.database.utils import get_user_by_api_key
 
 API_KEY_HEADER = APIKeyHeader(name="api_key")
 
