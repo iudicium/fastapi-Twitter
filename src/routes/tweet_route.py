@@ -8,8 +8,8 @@ from src.schemas.tweet_schema import TweetIn
 from src.utils.auth import authenticate_user
 
 from src.models.users import User
-from src.models.tweets import Tweet
 from src.models.likes import Like
+from src.models.tweets import Tweet
 
 from src.database.utils import (
     associate_media_with_tweet,
@@ -63,7 +63,7 @@ async def delete_tweet(
     tweet_to_delete = await get_tweet_by_id(tweet_id, session)
     if tweet_to_delete.user_id != current_user.id:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
+            status_code=status.HTTP_403_FORBIDDEN,
             detail="Regrettably, Your Entry Has Been Met With "
             "an Imposing Barrier, Rendering Further "
             "Passage Unattainable",
@@ -93,5 +93,32 @@ async def like_a_tweet(
         like_to_add = Like(user_id=current_user.id, tweet_id=tweet_to_like.id)
         session.add(like_to_add)
         await session.commit()
+
+    return dict()
+
+
+@router.delete(
+    "/tweets/{tweet_id}/likes",
+    status_code=status.HTTP_200_OK,
+    response_model=DefaultSchema,
+)
+async def delete_like_from_tweet(
+    tweet_id: int,
+    current_user: Annotated[User, "User model obtained from the api key"] = Depends(
+        authenticate_user
+    ),
+    session: AsyncSession = Depends(get_db_session),
+):
+    # This will raise an error if tweet does not exist
+    tweet = await get_tweet_by_id(tweet_id, session)
+    like = await get_like_by_id(session, tweet_id=tweet_id, user_id=current_user.id)
+    if like:
+        await session.delete(like)
+        await session.commit()
+    else:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="You already do not like that tweet.",
+        )
 
     return dict()

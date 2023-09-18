@@ -9,7 +9,11 @@ class TestMediaAPI:
     def setup_class(cls):
         cls.base_url = "/users/{}/follow"
         cls.expected_response = {"result": True}
-        cls.bad_response = {"detail": "You are not following this user."}
+        cls.error_response = {
+            "result": False,
+            "error_type": "Bad Request",
+            "error_message": "",
+        }
 
     @pytest.mark.asyncio
     async def test_follow_user_correct(self, client: AsyncClient):
@@ -19,16 +23,21 @@ class TestMediaAPI:
 
     @pytest.mark.asyncio
     async def test_follow_yourself(self, client: AsyncClient):
+        self.error_response["error_message"] = "Unable to follow yourself"
+
         response = await client.post(self.base_url.format("1"))
-        data = response.json()
+
         assert response.status_code == 400
-        assert "Unable to follow yourself" in data
+        assert response.json() == self.error_response
 
     @pytest.mark.asyncio
     async def test_follow_user_that_doesnt_exist(self, client: AsyncClient):
+        self.error_response["error_type"] = "Not Found"
+        self.error_response["error_message"] = "User does not exist."
+
         response = await client.post(self.base_url.format("10000"))
         assert response.status_code == 404
-        assert "User does not exist" in response.json()
+        assert response.json() == self.error_response
 
     @pytest.mark.asyncio
     async def test_unfollow_user(self, client: AsyncClient):
@@ -41,9 +50,12 @@ class TestMediaAPI:
 
     @pytest.mark.asyncio
     async def test_unfollow_user_that_is_not_followed(self, client: AsyncClient):
+        self.error_response["error_type"] = "Bad Request"
+        self.error_response["error_message"] = "You are not following this user."
         response = await client.delete(self.base_url.format(6))
+        print(response.json(), 555, self.error_response, "penis")
         assert response.status_code == 400
-        assert "You are not following this user" in response.json()
+        assert response.json() == self.error_response
 
     @pytest.mark.asyncio
     async def test_get_user_information(self, client: AsyncClient):

@@ -1,15 +1,20 @@
 from collections.abc import AsyncGenerator
+from random import randint
 
 import pytest
 import pytest_asyncio
+
 from fastapi import FastAPI
 from httpx import AsyncClient
-from sqlalchemy.ext.asyncio import (AsyncSession, async_sessionmaker,
-                                    create_async_engine)
+from faker import Faker
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
+from sqlalchemy import delete
 from src.database.database import DATABASE_URL, get_db_session
 from src.main import app
 from src.models.base import Base
 from src.models.users import User
+from src.models.tweets import Tweet
+
 from src.utils.settings import get_server_settings, get_test_settings
 
 server_settings = get_server_settings()
@@ -19,7 +24,7 @@ TEST_USERNAME = testing_settings.USERNAME
 
 
 @pytest_asyncio.fixture()
-async def db_session() -> AsyncGenerator[AsyncSession, None]:
+async def db_session() -> AsyncSession:
     db_name = DATABASE_URL.split("/")[-1]
     db_url = DATABASE_URL.replace(f"/{db_name}", f"/{testing_settings.DB_NAME}")
     engine = create_async_engine(db_url)
@@ -62,3 +67,13 @@ async def client(test_app: FastAPI) -> AsyncGenerator[AsyncClient, None]:
         headers={"api_key": testing_settings.API_KEY},
     ) as client:
         yield client
+
+
+@pytest_asyncio.fixture()
+async def create_random_tweets(faker: Faker, db_session: AsyncSession):
+    for _ in range(randint(5, 10)):
+        new_tweet = Tweet(
+            user_id=randint(2, 5),
+            tweet_data=faker.sentence(),
+        )
+        db_session.add(new_tweet)
