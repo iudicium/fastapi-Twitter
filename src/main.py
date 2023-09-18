@@ -1,5 +1,5 @@
 from fastapi import FastAPI, Depends
-from fastapi.exceptions import RequestValidationError
+from fastapi.exceptions import RequestValidationError, ResponseValidationError
 from starlette.exceptions import HTTPException
 from uvicorn import run
 from loguru import logger
@@ -10,6 +10,7 @@ from src.utils.settings import get_server_settings
 from src.utils.exceptions import (
     validation_exception_handler,
     custom_http_exception_handler,
+    response_validation_exception_handler,
 )
 
 
@@ -19,7 +20,9 @@ app = FastAPI(debug=True)
 
 app.add_exception_handler(RequestValidationError, validation_exception_handler)
 app.add_exception_handler(HTTPException, custom_http_exception_handler)
-
+app.add_exception_handler(
+    ResponseValidationError, response_validation_exception_handler
+)
 
 app.include_router(media_route.router, dependencies=[Depends(logging_dependency)])
 app.include_router(user_route.router, dependencies=[Depends(logging_dependency)])

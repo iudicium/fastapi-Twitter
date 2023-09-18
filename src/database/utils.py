@@ -116,6 +116,20 @@ async def get_tweet_by_id(
     return tweet
 
 
+async def get_all_following_tweets(session: AsyncSession, current_user: User):
+    """TODO add https://pypi.org/project/fastapi-pagination/"""
+    query = await session.execute(
+        select(Tweet)
+        .where(Tweet.user_id.in_(uuid.id for uuid in current_user.following))
+        .options(
+            selectinload(Tweet.user),
+            selectinload(Tweet.likes),
+            selectinload(Tweet.media),
+        )
+    )
+    return query.scalars().all()
+
+
 async def get_like_by_id(session: AsyncSession, tweet_id: int, user_id: int):
     """Get a like by user_id and tweet_id, or return None if not found"""
     query = await session.execute(

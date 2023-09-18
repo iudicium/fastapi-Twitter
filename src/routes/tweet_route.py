@@ -3,7 +3,7 @@ from fastapi import APIRouter, status, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.schemas.base_schema import DefaultSchema
-from src.schemas.tweet_schema import TweetIn
+from src.schemas.tweet_schema import TweetIn, TweetOut
 
 from src.utils.auth import authenticate_user
 
@@ -15,9 +15,9 @@ from src.database.utils import (
     associate_media_with_tweet,
     get_tweet_by_id,
     get_like_by_id,
+    get_all_following_tweets,
 )
 from src.database.database import get_db_session
-
 from loguru import logger
 
 router = APIRouter(prefix="/api/v1", tags=["tweets_and_likes_v1"])
@@ -122,3 +122,17 @@ async def delete_like_from_tweet(
         )
 
     return dict()
+
+
+@router.get("/tweets", status_code=status.HTTP_200_OK, response_model=TweetOut)
+async def get_following_tweets(
+    current_user: Annotated[User, "User model obtained from the api key"] = Depends(
+        authenticate_user
+    ),
+    session: AsyncSession = Depends(get_db_session),
+):
+    all_tweets = await get_all_following_tweets(
+        session=session, current_user=current_user
+    )
+
+    return {"tweets": all_tweets}

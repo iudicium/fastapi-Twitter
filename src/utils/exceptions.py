@@ -1,6 +1,6 @@
 from http.client import responses
 from fastapi import Request, status
-from fastapi.exceptions import RequestValidationError
+from fastapi.exceptions import RequestValidationError, ResponseValidationError
 from fastapi.responses import JSONResponse
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from loguru import logger
@@ -18,6 +18,22 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
     logger.exception(exc)
     return JSONResponse(
         error_schema.model_dump(), status_code=status.HTTP_422_UNPROCESSABLE_ENTITY
+    )
+
+
+async def response_validation_exception_handler(
+    request: Request, exc: ResponseValidationError
+):
+    error_type = "ResponseValidationError"
+    logger.error(
+        f"Method: {request.method} | URL: {request.url} Details: {exc.errors()}"
+    )
+    error_schema = ErrorResponse(
+        error_type=error_type, error_message=repr(exc.errors())
+    )
+    logger.exception(exc)
+    return JSONResponse(
+        error_schema.model_dump(), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
     )
 
 
