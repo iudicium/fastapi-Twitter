@@ -35,6 +35,8 @@ class ServerSettings(BaseSettings):
     )
     HOST: str
     PORT: str
+    DEBUG: bool
+    PRODUCTION: bool
 
 
 class TestSettings(BaseSettings):
@@ -54,6 +56,22 @@ class TestSettings(BaseSettings):
     USERNAME: str
 
 
+class LoggerSettings(BaseSettings):
+    model_config = SettingsConfigDict(
+        env_file=ENV_PATH,
+        env_prefix="LOGGER_",
+        env_file_encoding="utf-8",
+        case_sensitive=True,
+        extra="allow",
+    )
+
+    LEVEL: str
+    ROTATION: str
+    COMPRESSION: str
+    SERIALIZE: bool
+    BACKTRACE: bool
+
+
 @lru_cache()
 def get_pg_settings():
     return PostgresSettings()
@@ -67,3 +85,8 @@ def get_server_settings():
 @lru_cache()
 def get_test_settings():
     return TestSettings()
+
+
+@lru_cache()
+def get_logger_settings():
+    return LoggerSettings()

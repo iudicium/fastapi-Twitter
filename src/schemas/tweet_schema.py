@@ -1,13 +1,6 @@
 from typing import List, Optional
 
-
-from pydantic import (
-    BaseModel,
-    ConfigDict,
-    Field,
-    field_validator,
-    model_validator,
-)
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from src.models.likes import Like as LikeModel
 from src.schemas.base_schema import DefaultSchema

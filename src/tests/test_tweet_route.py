@@ -6,10 +6,7 @@ from httpx import AsyncClient
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.tests.conftest import (
-    unauthorized_structure_response,
-    valid_tweet_timeline_structure,
-)
+from src.tests.conftest import unauthorized_structure_response, valid_tweet_timeline_structure
 
 
 async def create_random_tweet(client: AsyncClient, json: Dict, tweet_data: str):

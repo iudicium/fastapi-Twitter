@@ -76,7 +76,6 @@ class TestMediaAPI:
     @pytest.mark.parametrize("unauthorized", ["/users/me", "/users/2"])
     async def test_get_wrong_auth(self, invalid_client: AsyncClient, unauthorized: str):
         response = await invalid_client.get(unauthorized)
-        print(response.json(), response.status_code)
         assert response.status_code == 401
         assert response.json() == unauthorized_structure_response
 

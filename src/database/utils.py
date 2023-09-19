@@ -119,7 +119,6 @@ async def get_tweet_by_id(
 
 
 async def get_all_following_tweets(session: AsyncSession, current_user: User):
-    """TODO add https://pypi.org/project/fastapi-pagination/"""
     query = await session.execute(
         select(Tweet)
         .where(Tweet.user_id.in_(uuid.id for uuid in current_user.following))
