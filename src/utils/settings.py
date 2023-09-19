@@ -33,6 +33,7 @@ class ServerSettings(BaseSettings):
         env_file_encoding="utf-8",
         case_sensitive=True,
     )
+    LOG_LEVEL: str
     HOST: str
     PORT: str
     DEBUG: bool

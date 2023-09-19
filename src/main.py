@@ -27,6 +27,7 @@ async def lifespan(app: FastAPI):
     logger.info(f"Server is starting up at {startup_time}")
     logger.info(f"Debug Mode: {settings.DEBUG}")
     logger.info(f"Produciton: {settings.PRODUCTION}")
+    logger.info(f"Server log level: {settings.LOG_LEVEL}")
     logger.info(f"Server is starting up on {settings.HOST}:{settings.PORT}")
     yield
     logger.info("Performing shutdown.")
@@ -59,4 +60,4 @@ app.include_router(tweet_route.router, dependencies=[Depends(logging_dependency)
 
 
 if __name__ == "__main__":
-    run(app, host=settings.HOST, port=int(settings.PORT))
+    run(app, host=settings.HOST, port=int(settings.PORT), log_level=settings.LOG_LEVEL)
