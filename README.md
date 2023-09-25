@@ -33,7 +33,7 @@
     {"username": "testuser3", "api_key": "test3"}
 ```
 
-***The backend is designed so that you can only see the user you are following  tweets.***
+***The backend is designed so that you can only see the tweets of the user you are following***
 
 ## **Manual Configuration**
 
