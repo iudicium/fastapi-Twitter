@@ -10,7 +10,7 @@ from src.schemas.base_schema import DefaultSchema
 from src.schemas.user_schema import UserOutSchema
 from src.utils.auth import authenticate_user
 
-router = APIRouter(prefix="/api/v1", tags=["users_v1"])
+router = APIRouter(prefix="/api", tags=["users_v1"])
 
 
 # Endpoint has to be here otherwise it will be 422 unprocessable

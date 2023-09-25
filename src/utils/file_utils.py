@@ -1,43 +1,42 @@
-from hashlib import sha256
-from os.path import splitext
-
+from pathlib import Path
 from aiofiles import open
 from fastapi import UploadFile
 
 from src.utils.settings import MEDIA_PATH
 
 
-async def generate_hash_from_filename(file_name: str) -> str:
+async def check_or_get_filename(path: Path) -> Path:
     """
-    Generates a unique hash-based file name from the given file name.
-
-    :param file_name: The original file name to be hashed.
-    :return: A unique hash-based file name including the original file extension.
+    Adds a numerical suffix to the filename if a file with the same name already exists.
+    :param path: The path to check and modify.
+    :return: The modified path with a numerical suffix.
     """
-    name, extension = splitext(file_name)
-    hash_object = sha256(name.encode())
-    hashed_name = hash_object.hexdigest()
-    return f"{hashed_name}{extension}"
+    original_path = path
+    counter = 0
+
+    while path.exists():
+        counter += 1
+        filename = f"{original_path.stem} ({counter}){original_path.suffix}"
+        path = original_path.with_name(filename)
+    print(path)
+    return path
 
 
-async def save_uploaded_file(user_name: str, uploaded_file: UploadFile) -> str:
+async def save_uploaded_file(uploaded_file: UploadFile) -> str:
     """
-    Uploads a file to the user's directory and returns the relative path for improved security.
-    :param user_name: The username of the user who is uploading the file.
+    Uploads a file and returns the relative path
     :param uploaded_file: The FastAPI UploadFile object representing the uploaded file.
     :return: The relative path to the saved file.
     :raises: Any exceptions that may occur during file upload and storage.
     """
 
-    user_dir = MEDIA_PATH / user_name
-    user_dir.mkdir(parents=True, exist_ok=True)
+    MEDIA_PATH.mkdir(parents=True, exist_ok=True)
 
-    unique_filename = await generate_hash_from_filename(uploaded_file.filename)
-
-    file_path = user_dir / unique_filename
+    file_path = MEDIA_PATH / uploaded_file.filename
+    filename = await check_or_get_filename(path=file_path)
+    img_path = f"images/{filename.stem}{filename.suffix}"
     content = uploaded_file.file.read()
-    async with open(file_path, "wb") as file:
+    async with open(filename, "wb") as file:
         await file.write(content)
-
-    relative_path = str(file_path.relative_to(MEDIA_PATH))
-    return relative_path
+    print(img_path)
+    return img_path

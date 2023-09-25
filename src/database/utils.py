@@ -2,7 +2,7 @@ from typing import List
 
 from fastapi import Depends, HTTPException, status
 from loguru import logger
-from sqlalchemy import select
+from sqlalchemy import select, desc
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
@@ -127,6 +127,7 @@ async def get_all_following_tweets(session: AsyncSession, current_user: User):
             selectinload(Tweet.likes),
             selectinload(Tweet.media),
         )
+        .order_by(desc(Tweet.create_date))
     )
     return query.scalars().all()
 

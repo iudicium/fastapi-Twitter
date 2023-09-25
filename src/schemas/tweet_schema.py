@@ -29,6 +29,10 @@ class TweetIn(BaseModel):
     tweet_media_ids: Optional[List[int]] = list()
 
 
+class TweetCreate(DefaultSchema):
+    tweet_id: int
+
+
 class Tweet(BaseModel):
     model_config = ConfigDict(
         from_attributes=True,
@@ -36,14 +40,14 @@ class Tweet(BaseModel):
     )
     id: int
     tweet_data: str = Field(alias="content")
-    media: List[Media] = Field(alias="attachments")
+    media: List = Field(alias="attachments")
     user: DefaultUser = Field(alias="author")
     likes: List[Like]
 
     @field_validator("media", mode="after")
     @classmethod
     def extract_attachments(cls, values: Media):
-        media_files = [value for value in values]
+        media_files = [value.media_path for value in values]
         return media_files
 
 

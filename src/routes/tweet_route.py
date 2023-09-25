@@ -1,5 +1,4 @@
-from typing import Annotated
-
+from typing import Annotated, Union
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -14,13 +13,17 @@ from src.models.likes import Like
 from src.models.tweets import Tweet
 from src.models.users import User
 from src.schemas.base_schema import DefaultSchema
-from src.schemas.tweet_schema import TweetIn, TweetOut
+from src.schemas.tweet_schema import TweetIn, TweetOut, TweetCreate
 from src.utils.auth import authenticate_user
 
-router = APIRouter(prefix="/api/v1", tags=["tweets_and_likes_v1"])
+router = APIRouter(prefix="/api", tags=["tweets_and_likes_v1"])
 
 
-@router.post("/tweets", status_code=status.HTTP_201_CREATED, response_model=TweetIn)
+@router.post(
+    "/tweets",
+    status_code=status.HTTP_201_CREATED,
+    response_model=Union[TweetIn, TweetCreate],
+)
 async def create_tweet(
     tweet_in: TweetIn,
     current_user: Annotated[User, "User model obtained from the api key"] = Depends(
@@ -42,9 +45,8 @@ async def create_tweet(
         )
 
     await session.commit()
-    # TODO Fix later { “result”: true, “tweet_id”: int }
 
-    return new_tweet
+    return {"result": True, "tweet_id": new_tweet.id}
 
 
 @router.delete(

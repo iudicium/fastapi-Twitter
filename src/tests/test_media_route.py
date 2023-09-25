@@ -35,11 +35,6 @@ class TestMediaAPI:
 
         assert response.status_code == 201
         assert response.json() == {"result": True, "media_id": 1}
-        files = listdir(self.test_user_media_path)
-        if len(files) >= 1:
-            hash, file_extension = files[0].split(".")
-            assert len(hash) == 64
-            assert file_extension == "jpg"
 
     @pytest.mark.asyncio
     async def test_incorrect_api_key(self, client: AsyncClient):

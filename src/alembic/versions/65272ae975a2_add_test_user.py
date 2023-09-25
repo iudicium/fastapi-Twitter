@@ -26,9 +26,9 @@ def upgrade() -> None:
     op.bulk_insert(
         users_table,
         [
-            {"username": "testuser1", "api_key": "key123"},
-            {"username": "testuser2", "api_key": "key456"},
-            {"username": "testuser3", "api_key": "key789"},
+            {"username": "testuser1", "api_key": "test"},
+            {"username": "testuser2", "api_key": "test2"},
+            {"username": "testuser3", "api_key": "test3"},
         ],
     )
 
