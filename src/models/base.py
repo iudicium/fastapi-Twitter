@@ -1,15 +1,11 @@
-from sqlalchemy.orm import DeclarativeBase
 from typing import Any
+
+from sqlalchemy.ext.asyncio import AsyncAttrs
+from sqlalchemy.orm import DeclarativeBase
 from sqlalchemy.orm.exc import DetachedInstanceError
-from sqlalchemy.orm import mapped_column, Mapped
 
 
-class Base(DeclarativeBase):
-    pk: Mapped[UUID] = mapped_column(
-        primary_key=True,
-        default=uuid4,
-    )
-
+class Base(AsyncAttrs, DeclarativeBase):
     def __repr__(self) -> str:
         return self._repr(id=self.id)
 
